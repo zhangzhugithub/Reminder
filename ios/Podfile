@@ -1,0 +1,75 @@
+# 离线应用：关闭 CocoaPods 统计上报（pod install 时的网络请求）
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+platform :ios, '13.0'
+
+# CocoaPods analytics sends network requests from a developer's machine only,
+# not from the app. Disabling it reduces external calls during builds.
+
+# Uncomment this line to define a global platform for your project
+# platform :ios, '13.0'
+
+# CocoaPods 分析仅影响开发机，不影响 App 离线运行。
+
+# 项目路径
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+def flutter_root
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  unless File.exist?(generated_xcode_build_settings_path)
+    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
+  end
+
+  File.foreach(generated_xcode_build_settings_path) do |line|
+    matches = line.match(/FLUTTER_ROOT\=(.*)/)
+    return matches[1].strip if matches
+  end
+  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
+end
+
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
+flutter_ios_podfile_setup
+
+target 'Runner' do
+  use_frameworks!
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+
+    # permission_handler：仅启用实际用到的权限宏，其余全部置 0，
+    # 避免编译进无关权限代码（符合"不申请无关权限"的离线原则）。
+    target.build_configurations.each do |config|
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
+        '$(inherited)',
+        'PERMISSION_MICROPHONE=1',
+        'PERMISSION_EVENTS=1',
+        'PERMISSION_EVENTS_FULL_ACCESS=1',
+        'PERMISSION_CAMERA=0',
+        'PERMISSION_PHOTOS=0',
+        'PERMISSION_LOCATION=0',
+        'PERMISSION_CONTACTS=0',
+        'PERMISSION_REMINDERS=0',
+        'PERMISSION_MEDIA_LIBRARY=0',
+        'PERMISSION_SPEECH_RECOGNIZER=0',
+        'PERMISSION_SENSORS=0',
+        'PERMISSION_BLUETOOTH=0',
+        'PERMISSION_APP_TRACKING_TRANSPARENCY=0',
+        'PERMISSION_CRITICAL_ALERTS=0',
+        'PERMISSION_NOTIFICATIONS=0',
+        'PERMISSION_ASSISTANT=0',
+      ]
+    end
+  end
+end

@@ -1,0 +1,56 @@
+name: reminder
+description: 离线语音日历提醒 - 完全离线的语音创建提醒应用，本地识别、本地存储、系统日历同步。
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # 本地数据库（hive 原版已停更，使用社区维护版 hive_ce）
+  hive_ce: 2.19.3
+  hive_ce_flutter: 2.3.4
+  # 状态管理
+  provider: 6.1.5+1
+  # 离线语音识别（模型文件通过 tool/download_model.* 下载到 assets/models/）
+  sherpa_onnx: 1.13.6
+  # 麦克风录音（PCM 流）
+  record: 7.1.1
+  # 系统日历
+  device_calendar: 4.3.3
+  # 本地定时通知
+  flutter_local_notifications: 22.3.0
+  # 时区
+  timezone: 0.11.1
+  flutter_timezone: 5.1.0
+  # 权限
+  permission_handler: 13.0.1
+  # 备份文件导入导出（SAF，免存储权限）
+  file_picker: 12.0.0
+  # 应用文档目录
+  path_provider: 2.1.6
+  # 路径拼接
+  path: ^1.9.0
+  # 任务 ID
+  uuid: ^4.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  # 供纯 Dart 单测（NLP/重复规则）脱离 Flutter SDK 独立运行：dart test test/nlp
+  test: ^1.25.0
+  # 仅供 tool/download_model.dart 解压模型压缩包使用
+  archive: 4.1.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    # 离线 ASR 模型目录（由 tool/download_model.sh 下载填充，已 gitignore）
+    - assets/models/

@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 注意：Flutter 模板默认在此文件声明 INTERNET 权限（供调试工具使用）。
+         本应用为纯离线应用，按硬性要求移除该权限。
+         USB 调试与热重载通过 adb reverse 本地端口转发实现，不需要网络权限；
+         若个别设备热重载异常，可改用 flutter run --release 调试。 -->
+</manifest>
