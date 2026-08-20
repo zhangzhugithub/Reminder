@@ -31,6 +31,7 @@ class BackupPage extends StatelessWidget {
     try {
       final result = await backup.importFromFile();
       if (result == null) return; // 用户取消
+      if (!context.mounted) return; // 期间页面可能已被销毁
       context.read<TaskListState>().refresh();
       messenger.showSnackBar(SnackBar(
         content: Text(

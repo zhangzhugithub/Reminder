@@ -19,6 +19,9 @@ class NotificationService {
   bool _initialized = false;
   bool _notificationPermissionRequested = false;
 
+  /// 冷启动时通知点击携带的任务 ID（Navigator 就绪后消费，见 [openPendingLaunchTask]）。
+  String? _pendingLaunchTaskId;
+
   AndroidFlutterLocalNotificationsPlugin? get _android =>
       _plugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
@@ -58,12 +61,24 @@ class NotificationService {
     );
     _initialized = true;
 
-    // 冷启动：应用被通知点击拉起
+    // 冷启动：应用被通知点击拉起。
+    // 注意：此时 runApp 尚未执行、Navigator 未构建，无法直接跳转，
+    // 先暂存任务 ID，由 main() 在首帧后调用 [openPendingLaunchTask]。
     final launchDetails = await _plugin.getNotificationAppLaunchDetails();
     if (launchDetails?.didNotificationLaunchApp ?? false) {
       final payload = launchDetails?.notificationResponse?.payload;
-      if (payload != null) openTaskDetail(payload);
+      if (payload != null) _pendingLaunchTaskId = payload;
     }
+  }
+
+  /// 消费冷启动通知点击（main() 在 runApp 后调用；内部延迟到首帧）。
+  void openPendingLaunchTask() {
+    final taskId = _pendingLaunchTaskId;
+    if (taskId == null) return;
+    _pendingLaunchTaskId = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      openTaskDetail(taskId);
+    });
   }
 
   /// 请求通知权限（Android 13+ POST_NOTIFICATIONS / iOS 授权）。

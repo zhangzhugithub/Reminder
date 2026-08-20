@@ -123,11 +123,18 @@ class _TaskEditPageState extends State<TaskEditPage> {
   }
 
   Future<DateTime?> _pickDateTime(DateTime initial) async {
+    const firstDate = DateTime(2020);
+    const lastDate = DateTime(2100);
+    // 备份恢复的任务可能超出日期选择器边界（showDatePicker 对越界
+    // initialDate 会 assert 崩溃），先钳制到合法范围
+    final clamped = initial.isBefore(firstDate)
+        ? firstDate
+        : (initial.isAfter(lastDate) ? lastDate : initial);
     final date = await showDatePicker(
       context: context,
-      initialDate: initial,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
+      initialDate: clamped,
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
     if (date == null || !mounted) return null;
     final time = await showTimePicker(

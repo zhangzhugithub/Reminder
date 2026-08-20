@@ -21,4 +21,6 @@ Future<void> main() async {
   // 启动补排（开机/升级后系统 receiver 原生重注册 + Dart 侧补排双保险）
   await appState.notificationScheduler.topUpAll();
   runApp(ReminderApp(appState: appState));
+  // 冷启动点击通知：Navigator 就绪后打开任务详情
+  appState.notificationService.openPendingLaunchTask();
 }
